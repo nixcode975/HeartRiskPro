@@ -16,7 +16,7 @@
     <section id="page-login" class="page active">
         <div class="auth-container">
             <div class="auth-image-panel">
-                <img src="assets/heart_hero.png" alt="Anatomical heart illustration" class="auth-hero-img" id="login-hero-img">
+                <img src="heart_hero.png" alt="Anatomical heart illustration" class="auth-hero-img" id="login-hero-img">
                 <div class="auth-image-overlay">
                     <h2 class="auth-brand">HeartRisk<span>Pro</span></h2>
                     <p class="auth-tagline">Advanced cardiovascular risk assessment powered by the Pooled Cohort Equations</p>
@@ -59,6 +59,7 @@
                         </button>
                         <p class="auth-switch">Don't have an account? <a href="#" id="goto-signup">Create one</a></p>
                     </form>
+                    <p class="medical-disclaimer">Medical Disclaimer: This tool is for educational purposes and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a healthcare professional.</p>
                 </div>
             </div>
         </div>
@@ -68,7 +69,7 @@
     <section id="page-signup" class="page">
         <div class="auth-container">
             <div class="auth-image-panel">
-                <img src="assets/heart_hero.png" alt="Anatomical heart illustration" class="auth-hero-img" id="signup-hero-img">
+                <img src="heart_hero.png" alt="Anatomical heart illustration" class="auth-hero-img" id="signup-hero-img">
                 <div class="auth-image-overlay">
                     <h2 class="auth-brand">HeartRisk<span>Pro</span></h2>
                     <p class="auth-tagline">Join thousands of healthcare professionals using evidence-based risk scoring</p>
@@ -131,6 +132,7 @@
                         </button>
                         <p class="auth-switch">Already have an account? <a href="#" id="goto-login">Sign in</a></p>
                     </form>
+                    <p class="medical-disclaimer">Medical Disclaimer: This tool is for educational purposes and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a healthcare professional.</p>
                 </div>
             </div>
         </div>
@@ -158,7 +160,7 @@
 
         <main class="calc-main">
             <div class="calc-hero">
-                <img src="assets/heart_hero.png" alt="Heart illustration" class="calc-hero-img" id="calc-hero-img">
+                <img src="heart_hero.png" alt="Heart illustration" class="calc-hero-img" id="calc-hero-img">
                 <div class="calc-hero-content">
                     <h1>10-Year ASCVD Risk Calculator</h1>
                     <p>Estimate the probability of a first atherosclerotic cardiovascular event using the ACC/AHA Pooled Cohort Equations</p>
@@ -196,8 +198,8 @@
                             <div class="form-group">
                                 <label>Race / Demographic</label>
                                 <div class="toggle-group" id="calc-race-group">
-                                    <button type="button" class="toggle-btn" data-value="aa" id="toggle-aa">African American</button>
-                                    <button type="button" class="toggle-btn" data-value="other" id="toggle-other-race">White</button>
+                                    <button type="button" class="toggle-btn" data-value="aa" id="toggle-aa">African Ancestry</button>
+                                    <button type="button" class="toggle-btn" data-value="white" id="toggle-other-race">General Ancestry</button>
                                 </div>
                                 <span class="error-msg" id="calc-race-error"></span>
                             </div>
@@ -298,6 +300,42 @@
                         </div>
                     </div>
 
+                    <div class="form-section ai-echo-section" id="echo-section">
+                        <h2 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            AI Echocardiography Analysis <span class="badge-pro">PRO</span>
+                        </h2>
+                        <p class="section-subtitle">Upload your Echo report or enter parameters manually for an AI-assisted risk estimation.</p>
+                        
+                        <div class="echo-upload-zone" id="echo-upload-zone">
+                            <input type="file" id="echo-file-input" accept=".pdf,image/*" hidden>
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <p><strong>Drag & Drop</strong> your report here, or <span class="upload-link" id="echo-upload-btn">Browse Files</span></p>
+                            <p class="upload-hint">Supports PDF, JPG, PNG. Our AI will automatically extract key measurements using PaddleOCR.</p>
+                            <div class="upload-loader hidden" id="echo-upload-loader">
+                                <span class="loader-spinner"></span>
+                                <span>Extracting data via OCR...</span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" id="echo-params-grid">
+                            <div class="form-group">
+                                <label for="calc-ef">Ejection Fraction (%)</label>
+                                <input type="number" id="calc-ef" min="10" max="90" step="1" placeholder="e.g. 55">
+                                <span class="input-hint">Normal: 50-70%</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="calc-lvedd">LVEDD (mm)</label>
+                                <input type="number" id="calc-lvedd" min="20" max="100" step="1" placeholder="e.g. 45">
+                                <span class="input-hint">Normal: 39-53mm</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="calc-lvesd">LVESD (mm)</label>
+                                <input type="number" id="calc-lvesd" min="10" max="80" step="1" placeholder="e.g. 30">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <button type="reset" class="btn-secondary" id="calc-reset-btn">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
@@ -339,6 +377,21 @@
                         <div class="result-percentage" id="result-percentage">0.0%</div>
                         <div class="result-category" id="result-category">—</div>
                         <p class="result-explanation" id="result-explanation"></p>
+                        
+                        <div class="ai-insight-box hidden" id="ai-insight-box">
+                            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> AI-Assisted Echo Insight</h3>
+                            <div class="ai-risk-row">
+                                <span>Echocardiography Risk:</span>
+                                <strong id="ai-risk-level" class="ai-badge">—</strong>
+                            </div>
+                            <div class="ai-risk-row">
+                                <span>AI Confidence:</span>
+                                <strong id="ai-confidence">—</strong>
+                            </div>
+                            <div id="ai-warnings" class="ai-warnings"></div>
+                            <p class="ai-disclaimer">This tool provides AI-assisted cardiovascular risk estimation and is not a substitute for professional medical advice or diagnosis.</p>
+                        </div>
+
                         <div class="result-breakdown" id="result-breakdown"></div>
                     </div>
                 </div>
@@ -351,5 +404,55 @@
     </section>
 
     <script src="app.js"></script>
+
+    <div class="terms-blocker" id="terms-blocker" aria-hidden="true"></div>
+    <footer class="terms-footer" id="terms-footer" role="dialog" aria-modal="true" aria-label="Terms of Use">
+        <p><strong>Terms of Use:</strong> This tool is for educational purposes and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a healthcare professional.</p>
+        <div class="terms-actions">
+            <button class="btn-ack" id="terms-decline">Decline</button>
+            <button class="btn-ack primary" id="terms-ack">I Acknowledge</button>
+        </div>
+    </footer>
+
+    <script>
+        (function(){
+            const key = 'termsAcknowledged_v1';
+            const acknowledged = localStorage.getItem(key) === 'true';
+            const blocker = document.getElementById('terms-blocker');
+            const footer = document.getElementById('terms-footer');
+            const ackBtn = document.getElementById('terms-ack');
+            const declineBtn = document.getElementById('terms-decline');
+
+            function showTerms() {
+                blocker.style.display = 'block';
+                footer.style.display = 'flex';
+                // prevent background interaction
+                document.documentElement.style.overflow = 'hidden';
+            }
+            function hideTerms() {
+                blocker.style.display = 'none';
+                footer.style.display = 'none';
+                document.documentElement.style.overflow = '';
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                if (!acknowledged) {
+                    showTerms();
+                } else {
+                    hideTerms();
+                }
+
+                ackBtn.addEventListener('click', function(){
+                    localStorage.setItem(key, 'true');
+                    hideTerms();
+                });
+
+                declineBtn.addEventListener('click', function(){
+                    // Redirect user to an informational page when they decline
+                    window.location.href = 'terms.html';
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

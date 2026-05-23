@@ -510,6 +510,30 @@
         // Set explanation
         expEl.textContent = explanation;
 
+        // AI Insight
+        const aiBox = $('#ai-insight-box');
+        const aiRiskLevel = $('#ai-risk-level');
+        const aiConfidence = $('#ai-confidence');
+        const aiWarnings = $('#ai-warnings');
+        
+        if (result.aiPrediction) {
+            aiBox.classList.remove('hidden');
+            aiRiskLevel.textContent = result.aiPrediction.risk_category;
+            aiRiskLevel.className = 'ai-badge ' + (result.aiPrediction.risk_category ? result.aiPrediction.risk_category.toLowerCase() : '');
+            aiConfidence.textContent = Math.round((result.aiPrediction.confidence_score || 0) * 100) + '%';
+            
+            aiWarnings.innerHTML = '';
+            if (result.aiPrediction.warnings && result.aiPrediction.warnings.length > 0) {
+                result.aiPrediction.warnings.forEach(w => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `⚠️ ${w}`;
+                    aiWarnings.appendChild(p);
+                });
+            }
+        } else {
+            if (aiBox) aiBox.classList.add('hidden');
+        }
+
         // Animate gauge needle
         // Needle spans 0° (far left) to 180° (far right) relative to the arc
         const needleAngle = Math.min(pct / 40, 1) * 180; // cap at 40% for visual
@@ -521,10 +545,10 @@
 
         // Breakdown summary
         const profileNames = {
-            white_male: 'White / Other Male',
-            white_female: 'White / Other Female',
-            aa_male: 'African American Male',
-            aa_female: 'African American Female'
+            white_male: 'General Ancestry Male',
+            white_female: 'General Ancestry Female',
+            aa_male: 'African Ancestry Male',
+            aa_female: 'African Ancestry Female'
         };
 
         breakdownEl.innerHTML = `
@@ -654,12 +678,40 @@
                         diabetes,
                         smoker
                     });
-                    displayResult(result);
+                    
+                    // Fetch AI Risk if parameters provided
+                    const ef = $('#calc-ef').value ? parseFloat($('#calc-ef').value) : null;
+                    const lvedd = $('#calc-lvedd').value ? parseFloat($('#calc-lvedd').value) : null;
+                    const lvesd = $('#calc-lvesd').value ? parseFloat($('#calc-lvesd').value) : null;
+
+                    if (ef || lvedd || lvesd) {
+                        fetch('http://localhost:8000/predict-echo-risk', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ef, lvedd, lvesd, age: ageVal, sbp })
+                        })
+                        .then(res => res.json())
+                        .then(aiData => {
+                            if(aiData.status === 'success') {
+                                result.aiPrediction = aiData.prediction;
+                            }
+                            displayResult(result);
+                            btn.classList.remove('loading');
+                        })
+                        .catch(err => {
+                            console.error('AI Predict Error:', err);
+                            displayResult(result);
+                            btn.classList.remove('loading');
+                        });
+                    } else {
+                        displayResult(result);
+                        btn.classList.remove('loading');
+                    }
                 } catch (err) {
                     showToast('Calculation error: ' + err.message, 'error');
                     console.error(err);
+                    btn.classList.remove('loading');
                 }
-                btn.classList.remove('loading');
             }, 600);
         });
 
@@ -757,6 +809,75 @@
     }
 
     // ==========================================
+    // ECHO UPLOAD LOGIC
+    // ==========================================
+    function initEchoUpload() {
+        const dropZone = $('#echo-upload-zone');
+        const fileInput = $('#echo-file-input');
+        const browseBtn = $('#echo-upload-btn');
+        const loader = $('#echo-upload-loader');
+
+        if (!dropZone || !fileInput) return;
+
+        browseBtn.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileUpload(fileInput.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                handleFileUpload(fileInput.files[0]);
+            }
+        });
+
+        function handleFileUpload(file) {
+            if (!file) return;
+            loader.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('http://localhost:8000/upload-echo-report', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                loader.classList.add('hidden');
+                if (data.status === 'success' && data.extracted_parameters) {
+                    const p = data.extracted_parameters;
+                    if (p.ef) $('#calc-ef').value = p.ef;
+                    if (p.lvedd) $('#calc-lvedd').value = p.lvedd;
+                    if (p.lvesd) $('#calc-lvesd').value = p.lvesd;
+                    showToast('Parameters extracted successfully', 'success');
+                } else {
+                    showToast('Failed to extract parameters', 'error');
+                }
+            })
+            .catch(err => {
+                loader.classList.add('hidden');
+                console.error(err);
+                showToast('OCR Service unavailable. Ensure backend is running.', 'error');
+            });
+        }
+    }
+
+    // ==========================================
     // INITIALIZATION
     // ==========================================
     function init() {
@@ -764,6 +885,7 @@
         initToggleGroups();
         initLoginForm();
         initSignupForm();
+        initEchoUpload();
         initCalcForm();
         initNavLinks();
         checkSession();

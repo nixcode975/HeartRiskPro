@@ -398,6 +398,61 @@ input { font-family: inherit; }
 .btn-primary.loading .btn-text { opacity: 0; }
 .btn-primary.loading .btn-loader { display: block; }
 
+/* =================== MEDICAL DISCLAIMER + TERMS FOOTER =================== */
+.medical-disclaimer {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+    padding: 0.75rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.02);
+}
+
+.terms-blocker {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 9998;
+    display: none;
+}
+
+.terms-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: linear-gradient(180deg, rgba(10,6,8,0.9), rgba(20,8,10,0.98));
+    color: var(--text-primary);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid rgba(225,29,72,0.08);
+}
+.terms-footer p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+.terms-footer .terms-actions { display: flex; gap: 0.75rem; align-items: center; }
+.terms-footer .btn-ack {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    color: var(--text-primary);
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.terms-footer .btn-ack.primary { background: linear-gradient(135deg, var(--accent-rose), var(--accent-crimson)); border-color: transparent; color: white; }
+
+@media (max-width: 640px) {
+    .terms-footer { flex-direction: column; align-items: stretch; gap: 0.6rem; padding: 0.9rem; }
+    .terms-footer p { font-size: 0.9rem; }
+}
+
 .btn-loader {
     display: none;
     width: 20px;
@@ -1046,4 +1101,147 @@ input { font-family: inherit; }
         radial-gradient(1px 1px at 80% 40%, rgba(190,18,60,0.12), transparent);
     pointer-events: none;
     z-index: 0;
+}
+
+/* =================== AI ECHOCARDIOGRAPHY =================== */
+.ai-echo-section {
+    position: relative;
+    border: 1px solid rgba(225, 29, 72, 0.2);
+    background: linear-gradient(135deg, rgba(225, 29, 72, 0.03), transparent);
+}
+
+.badge-pro {
+    background: linear-gradient(135deg, var(--accent-rose), var(--accent-crimson));
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.05em;
+    vertical-align: super;
+}
+
+.echo-upload-zone {
+    border: 2px dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    background: var(--bg-elevated);
+    transition: all 0.3s;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.echo-upload-zone:hover, .echo-upload-zone.dragover {
+    border-color: var(--accent-rose);
+    background: rgba(225, 29, 72, 0.05);
+}
+
+.upload-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--accent-rose);
+    margin-bottom: 0.5rem;
+}
+
+.upload-link {
+    color: var(--accent-rose);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.upload-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+.upload-loader {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 5, 7, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    border-radius: var(--radius-md);
+    z-index: 10;
+}
+.upload-loader.hidden {
+    display: none;
+}
+
+.loader-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(225, 29, 72, 0.3);
+    border-top-color: var(--accent-rose);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.ai-insight-box {
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, rgba(225, 29, 72, 0.05), transparent);
+    border: 1px solid rgba(225, 29, 72, 0.15);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    text-align: left;
+}
+.ai-insight-box.hidden {
+    display: none;
+}
+
+.ai-insight-box h3 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.ai-insight-box h3 svg {
+    color: var(--accent-rose);
+}
+
+.ai-risk-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.ai-risk-row:last-of-type {
+    border-bottom: none;
+}
+
+.ai-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.ai-badge.low { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+.ai-badge.moderate { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+.ai-badge.high { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+.ai-warnings {
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    color: #fca5a5;
+}
+.ai-warnings p {
+    margin-bottom: 0.3rem;
+}
+
+.ai-disclaimer {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
 }
