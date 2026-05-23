@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="USA-specific 10-Year ASCVD Atherosclerotic Cardiovascular Disease Risk Calculator. Estimate your cardiovascular event probability using the Pooled Cohort Equations.">
+    <meta name="keywords" content="ASCVD, cardiovascular risk, heart disease, risk calculator, pooled cohort equations">
+    <title>HeartRisk Pro — 10-Year ASCVD Risk Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ========== LOGIN PAGE ========== -->
+    <section id="page-login" class="page active">
+        <div class="auth-container">
+            <div class="auth-image-panel">
+                <img src="assets/heart_hero.png" alt="Anatomical heart illustration" class="auth-hero-img" id="login-hero-img">
+                <div class="auth-image-overlay">
+                    <h2 class="auth-brand">HeartRisk<span>Pro</span></h2>
+                    <p class="auth-tagline">Advanced cardiovascular risk assessment powered by the Pooled Cohort Equations</p>
+                </div>
+            </div>
+            <div class="auth-form-panel">
+                <div class="auth-form-wrapper">
+                    <div class="auth-header">
+                        <div class="auth-icon pulse-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h1>Welcome Back</h1>
+                        <p>Sign in to access your risk assessment dashboard</p>
+                    </div>
+                    <form id="login-form" class="auth-form" novalidate>
+                        <div class="form-group">
+                            <label for="login-email">Email Address</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email">
+                            </div>
+                            <span class="error-msg" id="login-email-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+                                <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                            <span class="error-msg" id="login-password-error"></span>
+                        </div>
+                        <button type="submit" class="btn-primary" id="login-submit-btn">
+                            <span class="btn-text">Sign In</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                        <p class="auth-switch">Don't have an account? <a href="#" id="goto-signup">Create one</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SIGNUP PAGE ========== -->
+    <section id="page-signup" class="page">
+        <div class="auth-container">
+            <div class="auth-image-panel">
+                <img src="assets/heart_hero.png" alt="Anatomical heart illustration" class="auth-hero-img" id="signup-hero-img">
+                <div class="auth-image-overlay">
+                    <h2 class="auth-brand">HeartRisk<span>Pro</span></h2>
+                    <p class="auth-tagline">Join thousands of healthcare professionals using evidence-based risk scoring</p>
+                </div>
+            </div>
+            <div class="auth-form-panel">
+                <div class="auth-form-wrapper">
+                    <div class="auth-header">
+                        <div class="auth-icon pulse-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h1>Create Account</h1>
+                        <p>Start your cardiovascular risk assessment journey</p>
+                    </div>
+                    <form id="signup-form" class="auth-form" novalidate>
+                        <div class="form-group">
+                            <label for="signup-name">Full Name</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <input type="text" id="signup-name" placeholder="Dr. Jane Smith" required autocomplete="name">
+                            </div>
+                            <span class="error-msg" id="signup-name-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-email">Email Address</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                <input type="email" id="signup-email" placeholder="you@example.com" required autocomplete="email">
+                            </div>
+                            <span class="error-msg" id="signup-email-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <input type="password" id="signup-password" placeholder="Min. 6 characters" required autocomplete="new-password">
+                                <button type="button" class="toggle-password" aria-label="Toggle password visibility">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="password-strength">
+                                <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                                <span class="strength-text" id="strength-text"></span>
+                            </div>
+                            <span class="error-msg" id="signup-password-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-confirm">Confirm Password</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <input type="password" id="signup-confirm" placeholder="Re-enter password" required autocomplete="new-password">
+                            </div>
+                            <span class="error-msg" id="signup-confirm-error"></span>
+                        </div>
+                        <button type="submit" class="btn-primary" id="signup-submit-btn">
+                            <span class="btn-text">Create Account</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                        <p class="auth-switch">Already have an account? <a href="#" id="goto-login">Sign in</a></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CALCULATOR PAGE ========== -->
+    <section id="page-calculator" class="page">
+        <nav class="top-nav">
+            <div class="nav-brand">
+                <div class="nav-icon pulse-icon-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <span>HeartRisk<strong>Pro</strong></span>
+            </div>
+            <div class="nav-right">
+                <span class="nav-user" id="nav-user-name"></span>
+                <button class="btn-logout" id="logout-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sign Out
+                </button>
+            </div>
+        </nav>
+
+        <main class="calc-main">
+            <div class="calc-hero">
+                <img src="assets/heart_hero.png" alt="Heart illustration" class="calc-hero-img" id="calc-hero-img">
+                <div class="calc-hero-content">
+                    <h1>10-Year ASCVD Risk Calculator</h1>
+                    <p>Estimate the probability of a first atherosclerotic cardiovascular event using the ACC/AHA Pooled Cohort Equations</p>
+                </div>
+            </div>
+
+            <div class="calc-body">
+                <form id="calc-form" class="calc-form" novalidate>
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Patient Demographics
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="calc-age">Age (years)</label>
+                                <input type="number" id="calc-age" min="40" max="79" step="1" placeholder="40–79" required>
+                                <span class="input-hint">Valid range: 40–79 years</span>
+                                <span class="error-msg" id="calc-age-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Biological Sex</label>
+                                <div class="toggle-group" id="calc-sex-group">
+                                    <button type="button" class="toggle-btn" data-value="male" id="toggle-male">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="14" r="5"/><line x1="19" y1="5" x2="13.6" y2="10.4"/><polyline points="19 5 19 10"/><polyline points="14 5 19 5"/></svg>
+                                        Male
+                                    </button>
+                                    <button type="button" class="toggle-btn" data-value="female" id="toggle-female">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+                                        Female
+                                    </button>
+                                </div>
+                                <span class="error-msg" id="calc-sex-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Race / Demographic</label>
+                                <div class="toggle-group" id="calc-race-group">
+                                    <button type="button" class="toggle-btn" data-value="aa" id="toggle-aa">African American</button>
+                                    <button type="button" class="toggle-btn" data-value="other" id="toggle-other-race">White</button>
+                                </div>
+                                <span class="error-msg" id="calc-race-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="calc-height">Height (cm)</label>
+                                <input type="number" id="calc-height" min="100" max="250" step="1" placeholder="e.g. 170">
+                                <span class="input-hint">Range: 100–250 cm</span>
+                                <span class="error-msg" id="calc-height-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="calc-weight">Weight (kg)</label>
+                                <input type="number" id="calc-weight" min="30" max="300" step="0.1" placeholder="e.g. 70">
+                                <span class="input-hint">Range: 30–300 kg</span>
+                                <span class="error-msg" id="calc-weight-error"></span>
+                            </div>
+                        </div>
+                        <!-- BMI Live Result -->
+                        <div id="bmi-result-card" class="bmi-result-card hidden">
+                            <div class="bmi-result-inner">
+                                <div class="bmi-info">
+                                    <span class="bmi-title">Your BMI</span>
+                                    <span class="bmi-number" id="bmi-value">—</span>
+                                    <span class="bmi-category-label" id="bmi-label">—</span>
+                                </div>
+                                <div class="bmi-bar-wrapper">
+                                    <div class="bmi-bar">
+                                        <div class="bmi-bar-segment bmi-seg-underweight"></div>
+                                        <div class="bmi-bar-segment bmi-seg-healthy"></div>
+                                        <div class="bmi-bar-segment bmi-seg-overweight"></div>
+                                        <div class="bmi-bar-segment bmi-seg-obese"></div>
+                                        <div class="bmi-pointer" id="bmi-pointer"></div>
+                                    </div>
+                                    <div class="bmi-bar-labels">
+                                        <span>&lt;18.5</span>
+                                        <span>18.5–24.9</span>
+                                        <span>25–29.9</span>
+                                        <span>≥30</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            Clinical Measurements
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="calc-total-chol">Total Cholesterol (mmol/L)</label>
+                                <input type="number" id="calc-total-chol" step="0.01" min="1" max="15" placeholder="e.g. 5.2" required>
+                                <span class="input-hint">Typical range: 3.0–8.0 mmol/L</span>
+                                <span class="error-msg" id="calc-total-chol-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="calc-hdl">HDL Cholesterol (mmol/L)</label>
+                                <input type="number" id="calc-hdl" step="0.01" min="0.3" max="5" placeholder="e.g. 1.3" required>
+                                <span class="input-hint">Typical range: 0.5–3.0 mmol/L</span>
+                                <span class="error-msg" id="calc-hdl-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="calc-sbp">Systolic Blood Pressure (mmHg)</label>
+                                <input type="number" id="calc-sbp" step="1" min="90" max="200" placeholder="e.g. 120" required>
+                                <span class="input-hint">Valid range: 90–200 mmHg</span>
+                                <span class="error-msg" id="calc-sbp-error"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            Medical History
+                        </h2>
+                        <div class="form-grid toggles-grid">
+                            <div class="form-group">
+                                <label>On BP Medication?</label>
+                                <div class="toggle-group" id="calc-bpmed-group">
+                                    <button type="button" class="toggle-btn" data-value="yes" id="toggle-bpmed-yes">Yes</button>
+                                    <button type="button" class="toggle-btn selected" data-value="no" id="toggle-bpmed-no">No</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Diabetes?</label>
+                                <div class="toggle-group" id="calc-diabetes-group">
+                                    <button type="button" class="toggle-btn" data-value="yes" id="toggle-diabetes-yes">Yes</button>
+                                    <button type="button" class="toggle-btn selected" data-value="no" id="toggle-diabetes-no">No</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Current Smoker?</label>
+                                <div class="toggle-group" id="calc-smoker-group">
+                                    <button type="button" class="toggle-btn" data-value="yes" id="toggle-smoker-yes">Yes</button>
+                                    <button type="button" class="toggle-btn selected" data-value="no" id="toggle-smoker-no">No</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn-secondary" id="calc-reset-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            Reset
+                        </button>
+                        <button type="submit" class="btn-primary btn-calculate" id="calc-submit-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            <span class="btn-text">Calculate Risk</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Result Card -->
+                <div id="result-card" class="result-card hidden">
+                    <div class="result-header">
+                        <h2>Your 10-Year ASCVD Risk</h2>
+                        <button type="button" class="result-close" id="result-close" aria-label="Close results">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-gauge-container">
+                            <svg class="result-gauge" viewBox="0 0 200 120" id="result-gauge">
+                                <defs>
+                                    <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#22c55e"/>
+                                        <stop offset="25%" style="stop-color:#eab308"/>
+                                        <stop offset="50%" style="stop-color:#f97316"/>
+                                        <stop offset="100%" style="stop-color:#ef4444"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>
+                                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gauge-gradient)" stroke-width="12" stroke-linecap="round" id="gauge-arc"/>
+                                <circle cx="100" cy="100" r="4" fill="currentColor" id="gauge-needle-pivot"/>
+                                <line x1="100" y1="100" x2="30" y2="100" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" id="gauge-needle" transform="rotate(0, 100, 100)"/>
+                            </svg>
+                        </div>
+                        <div class="result-percentage" id="result-percentage">0.0%</div>
+                        <div class="result-category" id="result-category">—</div>
+                        <p class="result-explanation" id="result-explanation"></p>
+                        <div class="result-breakdown" id="result-breakdown"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="calc-footer">
+            <p>Based on the 2013 ACC/AHA Pooled Cohort Equations for primary prevention. For clinical use only.</p>
+        </footer>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
