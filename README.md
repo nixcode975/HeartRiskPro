@@ -34,6 +34,11 @@ HeartRisk Pro is an advanced cardiovascular risk assessment platform that uses t
 ### 2. One-command start (recommended)
 From the project root on Windows:
 ```powershell
+.\START_HEARTRISK_PRO.bat
+```
+
+Or:
+```powershell
 .\start_app.ps1
 ```
 

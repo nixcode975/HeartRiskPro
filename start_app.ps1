@@ -24,6 +24,21 @@ if (-not $Python) {
 
 Set-Location $Root
 
+function Test-HeartRiskBackend {
+    try {
+        Invoke-WebRequest -Uri $HealthUrl -UseBasicParsing -TimeoutSec 1 | Out-Null
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+if (Test-HeartRiskBackend) {
+    Write-Host "HeartRisk backend is already running at $Url"
+    Start-Process $Url
+    return
+}
+
 Start-Job -ScriptBlock {
     param($HealthUrl, $Url)
 

@@ -1039,7 +1039,7 @@
                 const isNetwork = err.message === 'Failed to fetch' || err.name === 'TypeError';
                 setUploadStatus('Upload failed: ' + file.name, 'error');
                 if (isNetwork) {
-                    showToast('Cannot reach backend. Start: cd backend then python -m uvicorn main:app --host 127.0.0.1 --port 8000 — then open http://127.0.0.1:8000', 'error');
+                    showToast('Cannot reach backend. Open START_HEARTRISK_PRO.bat, then use http://127.0.0.1:8000', 'error');
                 } else {
                     showToast(err.message || 'Upload failed', 'error');
                 }
