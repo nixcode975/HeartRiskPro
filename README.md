@@ -31,7 +31,17 @@ HeartRisk Pro is an advanced cardiovascular risk assessment platform that uses t
    pip install -r requirements.txt
    ```
 
-### 2. Running the Backend API
+### 2. One-command start (recommended)
+From the project root on Windows:
+```powershell
+.\start_app.ps1
+```
+
+This starts the FastAPI backend on `http://127.0.0.1:8000` and opens the website once the backend health check is ready.
+
+In VS Code, run the launch configuration **Open HeartRisk Pro (starts backend)** to start the backend automatically before the browser opens.
+
+### 3. Running the Backend API manually
 From the **project root** (recommended):
 ```bash
 python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
@@ -44,7 +54,7 @@ python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 The API will be available at `http://localhost:8000`. You can view the docs at `http://localhost:8000/docs`.
 
-### 3. Running the Frontend (recommended: same server as API)
+### 4. Running the Frontend (recommended: same server as API)
 
 The backend serves the website and API together (avoids CORS / connection issues):
 
@@ -65,7 +75,7 @@ Open `http://localhost:3000`. Echo upload requires the backend on port 8000.
 
 **Echo upload without OCR installed:** upload a `.txt` report (e.g. `temp/test_report.txt`) or install full OCR deps: `pip install -r backend/requirements.txt`.
 
-### 4. Machine Learning Pipeline (Pending Dataset)
+### 5. Machine Learning Pipeline (Pending Dataset)
 To train the actual ML model, the Kaggle echocardiography dataset (CSV/XLSX) must be placed in the project folder. Once added, a training script will process the data and output `cvd_echo_model.pkl` to the backend directory.
 
 ## Disclaimer

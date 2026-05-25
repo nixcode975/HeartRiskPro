@@ -62,15 +62,26 @@
     }
 
     const API_BASE = apiBases()[0];
+    const API_CONNECT_ATTEMPTS = 12;
+    const API_RETRY_DELAY_MS = 500;
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     async function apiFetch(path, options) {
         let lastErr;
-        for (const base of apiBases()) {
-            try {
-                const res = await fetch(base + path, options);
-                return { res, base };
-            } catch (e) {
-                lastErr = e;
+        for (let attempt = 0; attempt < API_CONNECT_ATTEMPTS; attempt++) {
+            for (const base of apiBases()) {
+                try {
+                    const res = await fetch(base + path, options);
+                    return { res, base };
+                } catch (e) {
+                    lastErr = e;
+                }
+            }
+            if (attempt < API_CONNECT_ATTEMPTS - 1) {
+                await wait(API_RETRY_DELAY_MS);
             }
         }
         throw lastErr || new Error('Failed to fetch');
