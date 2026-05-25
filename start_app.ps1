@@ -22,8 +22,6 @@ if (-not $Python) {
     throw "Python was not found. Install Python or create .venv before running this script."
 }
 
-Set-Location $Root
-
 function Test-HeartRiskBackend {
     try {
         Invoke-WebRequest -Uri $HealthUrl -UseBasicParsing -TimeoutSec 1 | Out-Null
@@ -53,6 +51,8 @@ Start-Job -ScriptBlock {
     }
 } -ArgumentList $HealthUrl, $Url | Out-Null
 
+Set-Location (Join-Path $Root "backend")
+
 Write-Host "Starting HeartRisk Pro at $Url"
 Write-Host "Keep this terminal open while using the app."
-& $Python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+& $Python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000

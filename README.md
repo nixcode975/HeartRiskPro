@@ -46,6 +46,18 @@ This starts the FastAPI backend on `http://127.0.0.1:8000` and opens the website
 
 In VS Code, run the launch configuration **Open HeartRisk Pro (starts backend)** to start the backend automatically before the browser opens.
 
+The workspace task is also configured to start the backend when this folder opens in VS Code. If VS Code asks whether to allow automatic tasks for this folder, choose **Allow**.
+
+For full Windows login autostart, run:
+```powershell
+.\INSTALL_BACKEND_AUTOSTART.bat
+```
+
+To remove that login autostart later:
+```powershell
+.\UNINSTALL_BACKEND_AUTOSTART.bat
+```
+
 ### 3. Running the Backend API manually
 From the **project root** (recommended):
 ```bash
