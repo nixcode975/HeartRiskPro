@@ -46,7 +46,7 @@ def train_and_evaluate():
     print("="*50)
     
     # Handle missing values using Median Imputer
-    imputer = SimpleImputer(strategy='median')
+    # We will use a Pipeline instead of global imputation to prevent data leakage.
     
     X = df.drop(columns=['Cardiovascular_Risk'])
     y = df['Cardiovascular_Risk']
@@ -63,9 +63,6 @@ def train_and_evaluate():
     })
     feature_names = X.columns.tolist()
     
-    X_imputed = imputer.fit_transform(X)
-    X = pd.DataFrame(X_imputed, columns=feature_names)
-    
     print(f"Features mapped: {feature_names}")
     
     # Split
@@ -77,10 +74,12 @@ def train_and_evaluate():
     print("PHASE 3 - MACHINE LEARNING MODEL")
     print("="*50)
     
+    from sklearn.pipeline import Pipeline
+    
     models = {
-        'Logistic Regression': LogisticRegression(max_iter=1000),
-        'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
-        'XGBoost': XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
+        'Logistic Regression': Pipeline([('imputer', SimpleImputer(strategy='median')), ('classifier', LogisticRegression(max_iter=1000))]),
+        'Random Forest': Pipeline([('imputer', SimpleImputer(strategy='median')), ('classifier', RandomForestClassifier(n_estimators=100, random_state=42))]),
+        'XGBoost': Pipeline([('imputer', SimpleImputer(strategy='median')), ('classifier', XGBClassifier(eval_metric='logloss', random_state=42))])
     }
     
     best_model = None

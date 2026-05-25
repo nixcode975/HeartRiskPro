@@ -32,19 +32,38 @@ HeartRisk Pro is an advanced cardiovascular risk assessment platform that uses t
    ```
 
 ### 2. Running the Backend API
-Start the FastAPI server:
+From the **project root** (recommended):
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Or from the `backend` directory:
+```bash
+cd backend
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 The API will be available at `http://localhost:8000`. You can view the docs at `http://localhost:8000/docs`.
 
-### 3. Running the Frontend
-The frontend consists of static files. You can serve them using any static file server:
+### 3. Running the Frontend (recommended: same server as API)
+
+The backend serves the website and API together (avoids CORS / connection issues):
+
 ```bash
-# From the root directory (outside backend/)
+cd backend
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Open **http://127.0.0.1:8000** in your browser.
+
+**Alternative** (frontend on port 3000): keep the backend running on 8000, then in another terminal:
+
+```bash
 python -m http.server 3000
 ```
-Then navigate to `http://localhost:3000` in your web browser.
+
+Open `http://localhost:3000`. Echo upload requires the backend on port 8000.
+
+**Echo upload without OCR installed:** upload a `.txt` report (e.g. `temp/test_report.txt`) or install full OCR deps: `pip install -r backend/requirements.txt`.
 
 ### 4. Machine Learning Pipeline (Pending Dataset)
 To train the actual ML model, the Kaggle echocardiography dataset (CSV/XLSX) must be placed in the project folder. Once added, a training script will process the data and output `cvd_echo_model.pkl` to the backend directory.

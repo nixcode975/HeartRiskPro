@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Backend Model Status</title>
+  <style>
+    body { font-family: system-ui, Arial; padding: 2rem; }
+    .ok { color: green }
+    .bad { color: red }
+  </style>
+</head>
+<body>
+  <h1>Model Status</h1>
+  <div id="status">Checking...</div>
+  <pre id="details"></pre>
+
+  <script>
+    async function check() {
+      try {
+        const res = await fetch('/model-status');
+        const data = await res.json();
+        const statusEl = document.getElementById('status');
+        const detailsEl = document.getElementById('details');
+        if (data.model_loadable) {
+          statusEl.textContent = 'Model loaded and ready';
+          statusEl.className = 'ok';
+        } else if (data.model_exists) {
+          statusEl.textContent = 'Model file present but not loadable';
+          statusEl.className = 'bad';
+        } else {
+          statusEl.textContent = 'Model file missing';
+          statusEl.className = 'bad';
+        }
+        detailsEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('status').textContent = 'Error contacting backend';
+        document.getElementById('status').className = 'bad';
+        document.getElementById('details').textContent = err.toString();
+      }
+    }
+
+    // auto-run
+    check();
+  </script>
+</body>
+</html>

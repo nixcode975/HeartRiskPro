@@ -436,6 +436,8 @@
             }
 
             document.addEventListener('DOMContentLoaded', function(){
+                if (!blocker || !footer || !ackBtn || !declineBtn) return;
+
                 if (!acknowledged) {
                     showTerms();
                 } else {
@@ -448,7 +450,6 @@
                 });
 
                 declineBtn.addEventListener('click', function(){
-                    // Redirect user to an informational page when they decline
                     window.location.href = 'terms.html';
                 });
             });

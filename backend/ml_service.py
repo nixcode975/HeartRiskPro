@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
-MODEL_PATH = "cvd_echo_model.pkl"
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "cvd_echo_model.pkl")
 
 # Mock implementation until the actual model is trained with the dataset
 def predict_risk_mock(params: dict) -> dict:
@@ -64,10 +64,11 @@ def predict_risk(params: dict) -> dict:
         # Example of creating a dataframe for the model (adjust columns based on actual training)
         # We need the exact feature names the model was trained on
         # For now, this is a placeholder
-        feature_names = ["ef", "lvedd", "lvesd", "hr", "age", "sbp", "cholesterol"]
+        feature_names = ["age", "ef", "lvedd", "lvesd", "hr", "sbp", "cholesterol"]
         input_data = {}
         for f_name in feature_names:
-            input_data[f_name] = [params.get(f_name, 0.0) or 0.0]
+            val = params.get(f_name)
+            input_data[f_name] = [np.nan if val is None else float(val)]
             
         df = pd.DataFrame(input_data)
         
@@ -89,5 +90,25 @@ def predict_risk(params: dict) -> dict:
             "is_mock": False
         }
     except Exception as e:
+        # Log the error and fall back to the mock predictor.
+        # Common failure here is a ModuleNotFoundError when unpickling
+        # because the environment lacks scikit-learn/xgboost.
         print(f"Error making ML prediction: {e}")
         return predict_risk_mock(params)
+
+
+def is_model_loadable() -> dict:
+    """
+    Attempts to open and unpickle the model to determine whether
+    the runtime environment can load it. Returns a dict with
+    `exists` and `loadable` booleans and an optional `error` message.
+    """
+    if not os.path.exists(MODEL_PATH):
+        return {"exists": False, "loadable": False, "error": "Model file missing"}
+
+    try:
+        with open(MODEL_PATH, 'rb') as f:
+            _ = pickle.load(f)
+        return {"exists": True, "loadable": True}
+    except Exception as e:
+        return {"exists": True, "loadable": False, "error": str(e)}

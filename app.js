@@ -47,6 +47,35 @@
     // Cholesterol SI → US conversion factor
     const MMOL_TO_MGDL = 38.67;
 
+    function apiBases() {
+        const bases = [];
+        if (window.location.protocol !== 'file:' && window.location.port === '8000') {
+            bases.push(window.location.origin);
+        }
+        bases.push('http://127.0.0.1:8000', 'http://localhost:8000');
+        const seen = new Set();
+        return bases.filter((b) => {
+            if (seen.has(b)) return false;
+            seen.add(b);
+            return true;
+        });
+    }
+
+    const API_BASE = apiBases()[0];
+
+    async function apiFetch(path, options) {
+        let lastErr;
+        for (const base of apiBases()) {
+            try {
+                const res = await fetch(base + path, options);
+                return { res, base };
+            } catch (e) {
+                lastErr = e;
+            }
+        }
+        throw lastErr || new Error('Failed to fetch');
+    }
+
     // ==========================================
     // DOM References
     // ==========================================
@@ -64,9 +93,9 @@
     // Page Navigation
     // ==========================================
     function navigateTo(pageName) {
-        Object.values(pages).forEach(p => p.classList.remove('active', 'fade-in'));
+        Object.values(pages).forEach(p => { if (p && p.classList && p.classList.remove) p.classList.remove('active', 'fade-in'); });
         const target = pages[pageName];
-        if (target) {
+        if (target && target.classList) {
             target.classList.add('active', 'fade-in');
         }
     }
@@ -467,6 +496,7 @@
         const breakdownEl = $('#result-breakdown');
         const needleLine = $('#gauge-needle');
 
+        if (!card) return;
         card.classList.remove('hidden');
         // Re-trigger animation
         card.style.animation = 'none';
@@ -516,7 +546,7 @@
         const aiConfidence = $('#ai-confidence');
         const aiWarnings = $('#ai-warnings');
         
-        if (result.aiPrediction) {
+        if (result.aiPrediction && aiBox && aiRiskLevel && aiConfidence && aiWarnings) {
             aiBox.classList.remove('hidden');
             aiRiskLevel.textContent = result.aiPrediction.risk_category;
             aiRiskLevel.className = 'ai-badge ' + (result.aiPrediction.risk_category ? result.aiPrediction.risk_category.toLowerCase() : '');
@@ -539,8 +569,10 @@
         const needleAngle = Math.min(pct / 40, 1) * 180; // cap at 40% for visual
         const actualAngle = Math.min((pct / 100) * 180, 180);
         setTimeout(() => {
-            needleLine.setAttribute('transform', `rotate(${actualAngle}, 100, 100)`);
-            needleLine.style.transition = 'transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            if (needleLine) {
+                needleLine.setAttribute('transform', `rotate(${actualAngle}, 100, 100)`);
+                needleLine.style.transition = 'transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            }
         }, 100);
 
         // Breakdown summary
@@ -599,9 +631,71 @@
     // ==========================================
     // CALCULATOR FORM
     // ==========================================
+    const CALC_DRAFT_KEY = 'heartrisk_calc_draft_v1';
+
+    function saveCalcDraft() {
+        const form = $('#calc-form');
+        if (!form) return;
+
+        const draft = { inputs: {}, toggles: {} };
+        form.querySelectorAll('input[id]').forEach(input => {
+            if (input.type !== 'file') {
+                draft.inputs[input.id] = input.value;
+            }
+        });
+        form.querySelectorAll('.toggle-group[id]').forEach(group => {
+            const selected = group.querySelector('.toggle-btn.selected');
+            draft.toggles[group.id] = selected ? selected.dataset.value : null;
+        });
+
+        sessionStorage.setItem(CALC_DRAFT_KEY, JSON.stringify(draft));
+    }
+
+    function restoreCalcDraft() {
+        let draft;
+        try {
+            draft = JSON.parse(sessionStorage.getItem(CALC_DRAFT_KEY) || 'null');
+        } catch {
+            draft = null;
+        }
+        if (!draft) return;
+
+        Object.entries(draft.inputs || {}).forEach(([id, value]) => {
+            const input = $(`#${id}`);
+            if (input && input.type !== 'file') {
+                input.value = value;
+            }
+        });
+        Object.entries(draft.toggles || {}).forEach(([groupId, value]) => {
+            const group = $(`#${groupId}`);
+            if (!group || !value) return;
+            group.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value === value);
+            });
+        });
+
+        updateBMIDisplay();
+    }
+
+    function initCalcDraftPersistence() {
+        const form = $('#calc-form');
+        if (!form) return;
+
+        restoreCalcDraft();
+        form.addEventListener('input', saveCalcDraft);
+        form.addEventListener('change', saveCalcDraft);
+        form.addEventListener('click', (e) => {
+            if (e.target.closest('.toggle-btn')) {
+                setTimeout(saveCalcDraft, 0);
+            }
+        });
+    }
+
     function initCalcForm() {
         const form = $('#calc-form');
         if (!form) return;
+
+        initCalcDraftPersistence();
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -658,6 +752,7 @@
 
             if (!valid) {
                 showToast('Please correct the highlighted errors', 'error');
+                saveCalcDraft();
                 return;
             }
 
@@ -685,14 +780,17 @@
                     const lvesd = $('#calc-lvesd').value ? parseFloat($('#calc-lvesd').value) : null;
 
                     if (ef || lvedd || lvesd) {
-                        fetch('http://localhost:8000/predict-echo-risk', {
+                        apiFetch('/predict-echo-risk', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ef, lvedd, lvesd, age: ageVal, sbp })
+                            body: JSON.stringify({ ef, lvedd, lvesd, age: ageVal, sbp, cholesterol: totalChol })
                         })
-                        .then(res => res.json())
-                        .then(aiData => {
-                            if(aiData.status === 'success') {
+                        .then(async ({ res }) => {
+                            const aiData = await res.json().catch(() => ({}));
+                            if (!res.ok) {
+                                throw new Error(aiData.detail || res.statusText || 'Prediction failed');
+                            }
+                            if (aiData.status === 'success') {
                                 result.aiPrediction = aiData.prediction;
                             }
                             displayResult(result);
@@ -725,6 +823,8 @@
         const resetBtn = $('#calc-reset-btn');
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
+                sessionStorage.removeItem(CALC_DRAFT_KEY);
+
                 // Clear all toggle selections except defaults
                 $$('#calc-sex-group .toggle-btn, #calc-race-group .toggle-btn').forEach(b => b.classList.remove('selected'));
 
@@ -742,6 +842,8 @@
                 $('#result-card').classList.add('hidden');
                 const bmiCard = $('#bmi-result-card');
                 if (bmiCard) bmiCard.classList.add('hidden');
+                const uploadStatus = $('#echo-upload-status');
+                if (uploadStatus) uploadStatus.remove();
 
                 // Reset gauge needle
                 const needle = $('#gauge-needle');
@@ -819,19 +921,53 @@
 
         if (!dropZone || !fileInput) return;
 
-        browseBtn.addEventListener('click', () => fileInput.click());
+        function setUploadStatus(message, type = 'info') {
+            let status = $('#echo-upload-status');
+            if (!status) {
+                status = document.createElement('div');
+                status.id = 'echo-upload-status';
+                status.className = 'echo-upload-status';
+                dropZone.appendChild(status);
+            }
+            status.textContent = message;
+            status.className = 'echo-upload-status ' + type;
+        }
+
+        if (browseBtn) {
+            browseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                saveCalcDraft();
+                fileInput.click();
+            });
+        }
+
+        fileInput.addEventListener('click', (e) => {
+            e.stopPropagation();
+            saveCalcDraft();
+        });
 
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             dropZone.classList.add('dragover');
         });
 
-        dropZone.addEventListener('dragleave', () => {
+        dropZone.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             dropZone.classList.remove('dragover');
         });
 
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             dropZone.classList.remove('dragover');
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
@@ -841,38 +977,61 @@
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length) {
+                saveCalcDraft();
                 handleFileUpload(fileInput.files[0]);
             }
         });
 
         function handleFileUpload(file) {
             if (!file) return;
-            loader.classList.remove('hidden');
+            saveCalcDraft();
+            setUploadStatus('Selected: ' + file.name, 'info');
+            if (loader) loader.classList.remove('hidden');
 
             const formData = new FormData();
             formData.append('file', file);
 
-            fetch('http://localhost:8000/upload-echo-report', {
+            apiFetch('/upload-echo-report', {
                 method: 'POST',
                 body: formData
             })
-            .then(res => res.json())
-            .then(data => {
-                loader.classList.add('hidden');
+            .then(async ({ res }) => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const detail = data.detail;
+                    const msg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map(d => d.msg).join(', ') : res.statusText);
+                    throw new Error(msg || 'Upload failed');
+                }
+                if (loader) loader.classList.add('hidden');
                 if (data.status === 'success' && data.extracted_parameters) {
                     const p = data.extracted_parameters;
+                    const found = !!(p.ef || p.lvedd || p.lvesd || p.hr);
                     if (p.ef) $('#calc-ef').value = p.ef;
                     if (p.lvedd) $('#calc-lvedd').value = p.lvedd;
                     if (p.lvesd) $('#calc-lvesd').value = p.lvesd;
-                    showToast('Parameters extracted successfully', 'success');
+                    saveCalcDraft();
+                    if (found) {
+                        setUploadStatus('Uploaded: ' + file.name + ' - measurements extracted', 'success');
+                        showToast('Parameters extracted successfully', 'success');
+                    } else {
+                        setUploadStatus('Uploaded: ' + file.name + ' - no measurements detected', 'warning');
+                        showToast(data.message || 'No measurements found in file. Enter values manually or install OCR.', 'error');
+                    }
                 } else {
-                    showToast('Failed to extract parameters', 'error');
+                    setUploadStatus('Upload failed: ' + file.name, 'error');
+                    showToast(data.message || 'Failed to extract parameters', 'error');
                 }
             })
             .catch(err => {
-                loader.classList.add('hidden');
-                console.error(err);
-                showToast('OCR Service unavailable. Ensure backend is running.', 'error');
+                if (loader) loader.classList.add('hidden');
+                console.error('Echo upload error:', err);
+                const isNetwork = err.message === 'Failed to fetch' || err.name === 'TypeError';
+                setUploadStatus('Upload failed: ' + file.name, 'error');
+                if (isNetwork) {
+                    showToast('Cannot reach backend. Start: cd backend then python -m uvicorn main:app --host 127.0.0.1 --port 8000 — then open http://127.0.0.1:8000', 'error');
+                } else {
+                    showToast(err.message || 'Upload failed', 'error');
+                }
             });
         }
     }
