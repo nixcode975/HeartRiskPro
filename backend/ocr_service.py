@@ -1,7 +1,7 @@
 import re
 import os
 import importlib.util
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any, cast
 
 HAS_PADDLE = importlib.util.find_spec("paddleocr") is not None
 HAS_EASYOCR = importlib.util.find_spec("easyocr") is not None
@@ -12,7 +12,9 @@ HAS_PYPDF = (
 
 HAS_OCR = HAS_PADDLE or HAS_EASYOCR
 
-_ocr_reader = None
+HAS_PDF2IMAGE = importlib.util.find_spec("pdf2image") is not None
+
+_ocr_reader: Optional[Any] = None
 _ocr_init_error: Optional[str] = None
 
 
@@ -41,11 +43,13 @@ def _get_ocr_reader():
         return None
     try:
         if HAS_PADDLE:
-            from paddleocr import PaddleOCR
+            paddleocr = importlib.import_module("paddleocr")
+            PaddleOCR = getattr(paddleocr, "PaddleOCR")
             _ocr_reader = PaddleOCR(use_angle_cls=True, lang="en")
         elif HAS_EASYOCR:
-            import easyocr
-            _ocr_reader = easyocr.Reader(["en"], gpu=False)
+            easyocr = importlib.import_module("easyocr")
+            Reader = getattr(easyocr, "Reader")
+            _ocr_reader = Reader(["en"], gpu=False)
         return _ocr_reader
     except Exception as e:
         _ocr_init_error = str(e)
@@ -56,16 +60,58 @@ def _read_pdf_text(file_path: str) -> str:
     if not HAS_PYPDF:
         return ""
     try:
-        from pypdf import PdfReader
-    except ImportError:
-        from PyPDF2 import PdfReader
-    reader = PdfReader(file_path)
-    parts = []
-    for page in reader.pages:
-        text = page.extract_text()
-        if text:
-            parts.append(text)
-    return "\n".join(parts)
+        try:
+            pypdf = importlib.import_module("pypdf")
+            PdfReader = getattr(pypdf, "PdfReader")
+        except Exception:
+            pyPdf2 = importlib.import_module("PyPDF2")
+            PdfReader = getattr(pyPdf2, "PdfReader")
+        reader = PdfReader(file_path)
+        parts = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text:
+                parts.append(text)
+        return "\n".join(parts)
+    except Exception:
+        return ""
+
+
+def _run_ocr_on_pdf(file_path: str) -> Tuple[str, Optional[str]]:
+    if not HAS_PDF2IMAGE:
+        return "", (
+            "PDF has no extractable text and pdf2image is not installed. "
+            "Install pdf2image and a PDF rendering backend (poppler)."
+        )
+    try:
+        pdf2image = importlib.import_module("pdf2image")
+        convert_from_path = getattr(pdf2image, "convert_from_path")
+        import tempfile
+    except Exception as e:
+        return "", f"PDF conversion failed: {e}"
+
+    texts = []
+    temp_files = []
+    try:
+        images = convert_from_path(file_path)
+        for img in images:
+            tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+            temp_files.append(tmp.name)
+            img.save(tmp.name, format="PNG")
+            tmp.close()
+            page_text, note = _run_ocr_on_image(tmp.name)
+            if note:
+                # If OCR failed for a page, return the note.
+                return "", note
+            if page_text:
+                texts.append(page_text)
+        return "\n".join(texts), None
+    finally:
+        for p in temp_files:
+            try:
+                os.unlink(p)
+            except Exception:
+                pass
 
 
 def _run_ocr_on_image(file_path: str) -> Tuple[str, Optional[str]]:
@@ -80,13 +126,32 @@ def _run_ocr_on_image(file_path: str) -> Tuple[str, Optional[str]]:
     try:
         if HAS_PADDLE:
             result = reader.ocr(file_path, cls=True)
-            if result and result[0]:
-                for line in result[0]:
-                    extracted_text.append(line[1][0])
+            # PaddleOCR returns a list (one entry per page). Each page entry
+            # is itself a list of lines where text is usually at index 1
+            if result:
+                for page in result:
+                    if not page:
+                        continue
+                    for line in page:
+                        # line may be like [box, (text, score)] or [box, text]
+                        try:
+                            item = cast(Any, line)[1]
+                            if isinstance(item, (list, tuple)):
+                                extracted_text.append(item[0])
+                            else:
+                                extracted_text.append(item)
+                        except Exception:
+                            # fallback to stringifying the line
+                            extracted_text.append(str(line))
         elif HAS_EASYOCR:
             result = reader.readtext(file_path)
             for line in result:
-                extracted_text.append(line[1])
+                # easyocr returns (bbox, text, confidence)
+                try:
+                    item = cast(Any, line)[1]
+                    extracted_text.append(item)
+                except Exception:
+                    extracted_text.append(str(line))
     except Exception as e:
         return "", f"OCR processing failed: {e}"
 
@@ -109,6 +174,10 @@ def extract_text(file_path: str) -> Tuple[str, Optional[str]]:
                 "PDF has no extractable text. Install OCR: "
                 "pip install easyocr pypdf pillow opencv-python-headless"
             )
+        # If pypdf couldn't extract text, try rendering pages to images
+        # (requires `pdf2image` and a PDF backend like poppler) and OCR them.
+        if HAS_PDF2IMAGE:
+            return _run_ocr_on_pdf(file_path)
         return _run_ocr_on_image(file_path)
 
     if ext in (".png", ".jpg", ".jpeg", ".bmp", ".webp", ".tif", ".tiff"):
@@ -126,7 +195,7 @@ def parse_echo_parameters(text: str) -> dict:
     params = {}
 
     ef_match = re.search(
-        r"(?:EF|Ejection Fraction)[\s:=]*(\d{2,3})\s*%", text, re.IGNORECASE
+        r"(?:EF|Ejection Fraction)[\s:=]*(\d{1,3}(?:\.\d+)?)\s*%", text, re.IGNORECASE
     )
     if ef_match:
         params["ef"] = float(ef_match.group(1))
